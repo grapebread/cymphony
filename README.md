@@ -1,5 +1,8 @@
 # Copium
 
+Shuprovo Sikder and Geoffrey Lin  
+Period 4
+
 ## Proposal
 
 ### Description
