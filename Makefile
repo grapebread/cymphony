@@ -1,8 +1,8 @@
 all: main.o
-	gcc -Isrc/include -Lsrc/lib -o copium main.o -lSDL2main -lSDL2 -lSDL2_mixer
+	gcc -o copium main.o `sdl2-config --cflags --libs` -lSDL2_mixer
 
 main.o:	main.c
-	gcc -Isrc/include -Lsrc/lib -c main.c -lSDL2main -lSDL2 -lSDL2_mixer
+	gcc -c main.c `sdl2-config --cflags --libs` -lSDL2_mixer
 
 run:
 	./copium

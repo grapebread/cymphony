@@ -36,7 +36,6 @@ int main(int argc, char *args[])
     }
 
     // Load audio file
-    printf("%s\n", SDL_GetBasePath());
     music = Mix_LoadMUS(path);
     if (music == NULL)
     {
@@ -46,7 +45,7 @@ int main(int argc, char *args[])
 
     // Play track and set volume to half
     int i = Mix_PlayMusic(music, 1);
-    Mix_VolumeMusic(1);
+    Mix_VolumeMusic(10);
 
     int running = TRUE;
     while (running)
