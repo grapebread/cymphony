@@ -4,6 +4,9 @@ all: main.o
 main.o:	main.c
 	gcc -c main.c `sdl2-config --cflags --libs` -lSDL2_mixer
 
+gui:
+	gcc -o gui gui.c -lncurses -lmenu
+
 run:
 	./copium
 
