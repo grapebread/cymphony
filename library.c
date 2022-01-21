@@ -38,3 +38,24 @@ struct library *add_to_library(struct library *data, char *filename){
   }
   return head;
 }
+
+void save_library(struct library *data){
+	int i = open("file", O_CREAT | O_TRUNC | O_WRONLY, 0644);
+	while (data){
+		while (data -> album){
+			write(i, data -> album -> data -> path, sizeof(data -> album -> data -> path));
+			data -> album = data -> album -> next;
+		}
+		data = data -> next;
+	}
+}
+
+struct library *read_library(){
+	int i = open("file", O_RDONLY);
+	struct library *new_library = make_library();
+	char path[100];
+	while (read(i, path, sizeof(path))){
+		new_library = add_to_library(new_library, path);
+	}
+	return new_library;
+}

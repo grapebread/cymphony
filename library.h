@@ -7,3 +7,5 @@ struct library{
 
 struct library *make_library();
 struct library *add_to_library(struct library *data, char *filename);
+void save_library(struct library *data);
+struct library *read_library();
