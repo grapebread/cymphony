@@ -39,23 +39,22 @@ struct library *add_to_library(struct library *data, char *filename){
   return head;
 }
 
-void save_library(struct library *data){
-	int i = open("file", O_CREAT | O_TRUNC | O_WRONLY, 0644);
-	while (data){
-		while (data -> album){
-			write(i, data -> album -> data -> path, sizeof(data -> album -> data -> path));
-			data -> album = data -> album -> next;
-		}
-		data = data -> next;
-	}
-}
-
-struct library *read_library(){
-	int i = open("file", O_RDONLY);
-	struct library *new_library = make_library();
-	char path[100];
-	while (read(i, path, sizeof(path))){
-		new_library = add_to_library(new_library, path);
-	}
-	return new_library;
+struct library *remove_from_library(struct library *data, char *name){
+  struct library *head = data;
+  while (data){
+    struct album *tempalb = data -> album;
+    while (data -> album){
+      if (!strcasecmp(data -> album -> data -> title, name)){
+        data -> album = data -> album -> next;
+        if (data -> album == NULL){
+          data -> album = data -> next -> album;
+        }
+        return head;
+      }
+      data -> album = data -> album -> next;
+    }
+    data -> album = tempalb;
+    data = data -> next;
+  }
+  return head;
 }

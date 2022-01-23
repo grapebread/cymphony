@@ -11,6 +11,7 @@ struct album *make_album(){
 struct album *add_to_album(struct album *data, struct tags *new_mp3){
   struct album *head = data;
   struct album *new_data = make_album();
+  strcpy(new_data -> name, data -> name);
   new_data -> data = new_mp3;
   if (data -> data == NULL){
     data = new_data;
