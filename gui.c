@@ -1,154 +1,63 @@
-#include <ncurses.h>
-#include <menu.h>
-#include <string.h>
+#include "gui.h"
 
-char *albums[] =
-    {
-        "Assortment of sense",
-        "Cyrstal Stone",
-        "TOHO BOSSA NOVA",
-        "RETRO FUTURE GIRLS",
-        "disco metric",
-        "Adrastea",
-        "Sedecim",
-        "Solar",
-        "Broad Border",
-        "emotional feedback",
-        "Dream Materialise"};
-
-char *aos_tracks[] =
-    {
-        "Sukima Paradise",
-        "Illusionary Girl",
-        "Welcome to Owen's House",
-        "fof",
-        "The Gensokyo the Misfortune Gods Loved",
-        "night falls",
-        "Shooting Star Sparkling in the Sky ~ Meteor of magic",
-        "Dream of utopia",
-        "Lost Illusions",
-        "Now, quietly, the millennium..",
-        "Wind God Girl ~ eXceed mix",
-        "Unconfirmed frog fights syndrome"};
-
-char *rfg_tracks[] =
-    {
-        "Super Fine Red",
-        "Ready Made City Life",
-        "Cherry Blossom Crash",
-        "MyonMyonMyonMyonMyonMyonMyon!",
-        "Fly Out! Bankikki",
-        "Spring Rouge",
-        "Desert Years",
-        "Phoenix"};
-
-int main(void)
+WINDOW **setup(WINDOW **ctrl_win)
 {
     initscr();
-    cbreak();
+    nodelay(stdscr, true);
     noecho();
-    curs_set(0);
+    // curs_set(0);
 
-    init_pair(1, COLOR_RED, COLOR_BLACK);
-
-    int yMax, xMax;
-    getmaxyx(stdscr, yMax, xMax);
+    int y_max, x_max;
+    getmaxyx(stdscr, y_max, x_max);
 
     int title_pad = 3;
-    int height = yMax - 8 - title_pad;
-    int width = (xMax / 3);
+    int height = y_max - 8 - title_pad;
+    int width = (x_max / 3);
 
-    // Albums
-    WINDOW *albumwin = newwin(height, width, title_pad, 1);
-    box(albumwin, 0, 0);
+    // 0 - Albums
+    // 1 - Tracks
+    // 2 - Track info
+    // 3 - Bottom bar
+    ctrl_win[0] = create_win(height, width, title_pad, 1);
+    ctrl_win[1] = create_win(height, width, title_pad, width + 1);
+    ctrl_win[2] = create_win(height, width, title_pad, width * 2 + 1);
+    ctrl_win[3] = create_win(8, x_max - 2, y_max - 8, 1);
+
+    WINDOW *album_title = create_win(title_pad, width, 0, 1);
+    WINDOW *track_title = create_win(title_pad, width, 0, width + 1);
+    WINDOW *info_title = create_win(title_pad, width, 0, width * 2 + 1);
+
+    keypad(ctrl_win[0], true);
+    keypad(ctrl_win[1], true);
+
+    return ctrl_win;
+}
+
+WINDOW *create_win(int height, int width, int start_y, int start_x)
+{
+    WINDOW *win = newwin(height, width, start_y, start_x);
+    box(win, 0, 0);
     refresh();
-    wrefresh(albumwin);
+    wrefresh(win);
 
-    WINDOW *albumtitle = newwin(title_pad, width, 0, 1);
-    box(albumtitle, 0, 0);
-    refresh();
-    wrefresh(albumtitle);
+    return win;
+}
 
-    // Tracks
-    WINDOW *trackwin = newwin(height, width, title_pad, width + 1);
-    box(trackwin, 0, 0);
-    refresh();
-    wrefresh(trackwin);
-
-    WINDOW *tracktitle = newwin(title_pad, width, 0, width + 1);
-    box(tracktitle, 0, 0);
-    refresh();
-    wrefresh(tracktitle);
-
-    // Track Info
-    WINDOW *infowin = newwin(height, width, title_pad, width * 2 + 1);
-    box(infowin, 0, 0);
-    refresh();
-    wrefresh(infowin);
-
-    WINDOW *infotitle = newwin(title_pad, width, 0, width * 2 + 1);
-    box(infotitle, 0, 0);
-    refresh();
-    wrefresh(infotitle);
-
-    // Bar
-    WINDOW *barwin = newwin(8, xMax - 2, yMax - 8, 1);
-    box(barwin, 0, 0);
-    refresh();
-    wrefresh(barwin);
-
-    keypad(albumwin, true);
-    keypad(trackwin, true);
-    WINDOW *screens[] = {albumwin, trackwin};
-
-    int choice;
-    int highlight = 0;
-
-    while (TRUE)
+void create_status_window(char *message)
+{
+    int y_max, x_max;
+    getmaxyx(stdscr, y_max, x_max);
+    WINDOW *win = create_win(4, 40, (y_max / 2) - 4, (x_max / 2) - 40);
+    PANEL *pan = new_panel(win);
+    mvwprintw(pan->win, 1, 1, message);
+    mvwprintw(pan->win, 2, 1, "Press any key to continue.");
+    wrefresh(win);
+    while (true)
     {
-        for (int i = 0; i < 11; ++i)
+        if (wgetch(pan->win) != -1)
         {
-            if (i == highlight)
-                wattron(albumwin, A_REVERSE);
-            mvwprintw(albumwin, i + 2, 2, albums[i]);
-            wattroff(albumwin, A_REVERSE);
-        }
-
-        if (!strcmp(albums[highlight], "Assortment of sense"))
-        {
-            for (int i = 0; i < 12; ++i)
-                mvwprintw(trackwin, i + 2, 2, aos_tracks[i]);
-        }
-        else if (!strcmp(albums[highlight], "RETRO FUTURE GIRLS"))
-        {
-            for (int i = 0; i < 8; ++i)
-                mvwprintw(trackwin, i + 2, 2, rfg_tracks[i]);
-        }
-        else
-        {
-            werase(trackwin);
-            box(trackwin, 0, 0);
-        }
-
-        wrefresh(trackwin);
-
-        choice = wgetch(albumwin);
-
-        switch (choice)
-        {
-        case KEY_UP:
-            if (!(highlight <= 0))
-                --highlight;
-            break;
-        case KEY_DOWN:
-            if (!(highlight >= 10))
-                ++highlight;
-            break;
-        default:
             break;
         }
     }
-
-    getch();
-    endwin();
+    del_panel(pan);
 }
