@@ -1,5 +1,5 @@
 all: main.o library.o album.o id3reader.o gui.o
-	gcc -o copium main.o gui.o library.o album.o id3reader.o -lavformat -lavutil -lavcodec -lncurses -lpanel
+	gcc -o copium main.o gui.o library.o album.o id3reader.o `sdl2-config --cflags --libs` -lavformat -lavutil -lavcodec -lncurses -lpanel -lSDL2_mixer
 
 main.o: main.c gui.c gui.h library.c library.h album.c album.h id3reader.c id3reader.h
 	gcc -c main.c
