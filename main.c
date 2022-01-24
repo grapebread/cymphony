@@ -18,13 +18,19 @@ int main(void)
 {
     int fd1[2];
     int fd2[2];
+
     pipe(fd1);
     pipe(fd2);
-    int f = fork();
-    int quit = false;
+
     int album_len;
+
+    int quit = false;
     char *asc_desc[2] = {"Ascending", "Descending"};
+    char input[100] = {'\0'};
+
     av_log_set_level(AV_LOG_QUIET);
+
+    int f = fork();
 
     if (f)
     {
@@ -32,16 +38,6 @@ int main(void)
         close(fd1[0]);
 
         struct library *library = make_library();
-        library = add_to_library(library, "music/ab1.mp3");
-        // library = add_to_library(library, "music/ab2.mp3");
-        library = add_to_library(library, "music/cc1.mp3");
-        library = add_to_library(library, "music/cc2.mp3");
-        library = add_to_library(library, "music/dd1.mp3");
-        library = add_to_library(library, "music/dd2.mp3");
-        library = add_to_library(library, "music/kv1.mp3");
-        library = add_to_library(library, "music/kv2.mp3");
-        // save_library(library);
-        //  struct library *library = read_library();
 
         // 0 - Albums
         // 1 - Tracks
@@ -49,6 +45,19 @@ int main(void)
         // 3 - Bottom bar
         WINDOW *ctrl_win[NUM_WIN];
         setup(ctrl_win);
+
+        int fd = open("library.data", O_RDONLY);
+        if (fd == -1)
+        {
+            create_input_window("Please enter a path to a song to add to the library below. (relative please)", input);
+            library = add_to_library(library, input);
+        }
+        else
+        {
+            // reads library.data
+            printf("here\n");
+            library = read_library();
+        }
 
         struct album *queue = make_album();
 
@@ -61,8 +70,6 @@ int main(void)
         {
             if (quit)
                 break;
-
-            char input[100] = {'\0'};
 
             werase(ctrl_win[0]);
             box(ctrl_win[0], 0, 0);
