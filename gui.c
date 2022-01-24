@@ -27,6 +27,15 @@ WINDOW **setup(WINDOW **ctrl_win)
     WINDOW *track_title = create_win(title_pad, width, 0, width + 1);
     WINDOW *info_title = create_win(title_pad, width, 0, width * 2 + 1);
 
+    mvwprintw(album_title, 2, (x_max - strlen("Albums")) / 2, "Albums");
+    mvwprintw(track_title, 2, (x_max - strlen("Tracks")) / 2, "Tracks");
+    mvwprintw(info_title, 2, (x_max - strlen("Info & Queue")) / 2, "Info & Queue");
+
+    refresh();
+    wrefresh(album_title);
+    wrefresh(track_title);
+    wrefresh(info_title);
+
     keypad(ctrl_win[0], true);
     keypad(ctrl_win[1], true);
 
@@ -86,7 +95,7 @@ int create_selection_window(char **selections, char *message, int size)
 {
     int y_max, x_max;
     getmaxyx(stdscr, y_max, x_max);
-    WINDOW *win = create_win(size + 8, 40, (y_max / 2) - 10, (x_max / 2) - 20);
+    WINDOW *win = create_win(size + 8, 50, (y_max / 2) - 10, (x_max / 2) - 25);
     PANEL *pan = new_panel(win);
     mvwprintw(pan->win, 2, 2, "Sort by %s?", message);
     wrefresh(win);
@@ -95,7 +104,7 @@ int create_selection_window(char **selections, char *message, int size)
 
     while (true)
     {
-        for (int i = 0; i < 2; ++i)
+        for (int i = 0; i < size; ++i)
         {
             if (i == highlight)
                 wattron(pan->win, A_REVERSE);
@@ -116,8 +125,6 @@ int create_selection_window(char **selections, char *message, int size)
                 ++highlight;
             break;
         case 10:
-            printw("%d", highlight);
-            refresh();
             return highlight;
             break;
         default:

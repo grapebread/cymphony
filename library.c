@@ -127,8 +127,106 @@ struct library *get_nth_album(struct library *data, int n)
     }
 }
 
-// direction = 0 = ascending
-// direction = 0 = descending
 struct library *sort(struct library *data, int direction)
 {
+    if (direction == 0)
+    {
+        struct library *current = data;
+        struct library *sorted = NULL;
+        while (current != NULL)
+        {
+            struct library *next = current->next;
+            sorted = sortedInsertAsc(sorted, current);
+            current = next;
+        }
+        return sorted;
+    }
+    else
+    {
+        struct library *current = data;
+        struct library *sorted = NULL;
+        while (current != NULL)
+        {
+            struct library *next = current->next;
+            sorted = sortedInsertDes(sorted, current);
+            current = next;
+        }
+        return sorted;
+    }
+}
+
+struct library *sortedInsertAsc(struct library *head, struct library *node)
+{
+    if (head == NULL || strcasecmp(head->album->name, node->album->name) > 0)
+    {
+        node->next = head;
+        return node;
+    }
+    else
+    {
+        struct library *current = head;
+        while (current->next != NULL && strcasecmp(current->next->album->name, node->album->name) < 0)
+        {
+            current = current->next;
+        }
+        node->next = current->next;
+        current->next = node;
+    }
+    return head;
+}
+
+struct library *sortedInsertDes(struct library *head, struct library *node)
+{
+    if (head == NULL || strcasecmp(head->album->name, node->album->name) < 0)
+    {
+        node->next = head;
+        return node;
+    }
+    else
+    {
+        struct library *current = head;
+        while (current->next != NULL && strcasecmp(current->next->album->name, node->album->name) > 0)
+        {
+            current = current->next;
+        }
+        node->next = current->next;
+        current->next = node;
+    }
+    return head;
+}
+
+struct library *sort_album(struct library *data, int direction, int type)
+{
+    struct album *current = data->album;
+    struct album *sorted = NULL;
+
+    while (current != NULL)
+    {
+        struct album *next = current->next;
+
+        if (direction == 0)
+        {
+
+            if (type == 0)
+                sorted = sorted_insert_name_asc(sorted, current);
+            if (type == 1)
+                sorted = sorted_insert_artist_asc(sorted, current);
+            if (type == 2)
+                sorted = sorted_insert_duration_asc(sorted, current);
+        }
+        else
+        {
+            if (type == 0)
+                sorted = sorted_insert_name_des(sorted, current);
+            if (type == 1)
+                sorted = sorted_insert_artist_des(sorted, current);
+            if (type == 2)
+                sorted = sorted_insert_duration_des(sorted, current);
+        }
+
+        current = next;
+    }
+
+    data->album = sorted;
+    return data;
 }

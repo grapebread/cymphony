@@ -65,3 +65,117 @@ int get_album_len(struct album *data)
 
     return i;
 }
+
+struct album *sorted_insert_name_asc(struct album *head, struct album *node)
+{
+    if (head == NULL || strcasecmp(head->data->title, node->data->title) > 0)
+    {
+        node->next = head;
+        return node;
+    }
+    else
+    {
+        struct album *current = head;
+        while (current->next != NULL && strcasecmp(current->next->data->title, node->data->title) < 0)
+            current = current->next;
+        node->next = current->next;
+        current->next = node;
+    }
+
+    return head;
+}
+
+struct album *sorted_insert_name_des(struct album *head, struct album *node)
+{
+    if (head == NULL || strcasecmp(head->data->title, node->data->title) < 0)
+    {
+        node->next = head;
+        return node;
+    }
+    else
+    {
+        struct album *current = head;
+        while (current->next != NULL && strcasecmp(current->next->data->title, node->data->title) > 0)
+            current = current->next;
+        node->next = current->next;
+        current->next = node;
+    }
+
+    return head;
+}
+
+struct album *sorted_insert_artist_asc(struct album *head, struct album *node)
+{
+    if (head == NULL || strcasecmp(head->data->artist, node->data->artist) > 0)
+    {
+        node->next = head;
+        return node;
+    }
+    else
+    {
+        struct album *current = head;
+        while (current->next != NULL && strcasecmp(current->next->data->artist, node->data->artist) < 0)
+            current = current->next;
+        node->next = current->next;
+        current->next = node;
+    }
+
+    return head;
+}
+
+struct album *sorted_insert_artist_des(struct album *head, struct album *node)
+{
+    if (head == NULL || strcasecmp(head->data->artist, node->data->artist) < 0)
+    {
+        node->next = head;
+        return node;
+    }
+    else
+    {
+        struct album *current = head;
+        while (current->next != NULL && strcasecmp(current->next->data->artist, node->data->artist) > 0)
+            current = current->next;
+        node->next = current->next;
+        current->next = node;
+    }
+
+    return head;
+}
+
+struct album *sorted_insert_duration_asc(struct album *head, struct album *node)
+{
+    if (head == NULL || head->data->duration > node->data->duration)
+    {
+        node->next = head;
+        return node;
+    }
+    else
+    {
+        struct album *current = head;
+        while (current->next != NULL && current->next->data->artist < node->data->artist)
+            current = current->next;
+        node->next = current->next;
+        current->next = node;
+    }
+
+    return head;
+}
+
+struct album *sorted_insert_duration_des(struct album *head, struct album *node)
+{
+    if (head == NULL || head->data->artist < node->data->artist)
+    {
+        node->next = head;
+        return node;
+    }
+    else
+    {
+        struct album *current = head;
+        while (current->next != NULL && current->next->data->artist > node->data->artist)
+            current = current->next;
+        node->next = current->next;
+        current->next = node;
+    }
+
+    return head;
+}

@@ -29,7 +29,7 @@ int main(void)
 
     int quit = false;
     char *asc_desc[] = {"Ascending", "Descending"};
-    char *sort_data[] = {"Title", "Artist", "Genre", "Duration"};
+    char *sort_data[] = {"Title", "Artist", "Duration"};
     char input[100] = {'\0'};
 
     av_log_set_level(AV_LOG_QUIET);
@@ -59,7 +59,6 @@ int main(void)
         }
         else
         {
-            // reads library.data
             library = read_library();
         }
 
@@ -69,11 +68,17 @@ int main(void)
         int highlight_album = 0;
         int highlight_track = 0;
 
+        struct album *curr_track = NULL;
+        struct album *play_track = NULL;
+
         int i;
         while (TRUE)
         {
             if (quit)
+            {
+                kill(f, SIGKILL);
                 break;
+            }
 
             werase(ctrl_win[0]);
             box(ctrl_win[0], 0, 0);
@@ -103,13 +108,33 @@ int main(void)
             {
                 mvwprintw(ctrl_win[1], i + 2, 2, temp->data->title);
             }
-            char strtime[10] = {"/0"};
-            if (read(fd3[0], strtime, 10) != -1)
-            {
-                mvwprintw(ctrl_win[3], i + 2, 2, strtime);
-            }
 
-            struct album *curr_track = get_nth_track(curr_album->album, highlight_track);
+            char strtime[10] = {"/0"};
+            if (read(fd3[0], strtime, 10) != -1 && play_track != NULL)
+            {
+                int info_y, info_x;
+                getmaxyx(ctrl_win[3], info_y, info_x);
+
+                char title[512];
+                sprintf(title, "%s by %s", play_track->data->title, play_track->data->artist);
+                mvwprintw(ctrl_win[3], 2, (info_x - strlen(title)) / 2, title);
+                mvwprintw(ctrl_win[3], 4, 2, "%s / %s", convert_sec_to_minsec(atoi(strtime)), convert_sec_to_minsec(play_track->data->duration));
+
+                float ratio = atoi(strtime) / (float)play_track->data->duration;
+
+                for (int j = 0; j < info_x - 23; j++)
+                {
+                    int threshold = ratio * (info_x - 25);
+                    if (j < threshold)
+                    {
+                        wattron(ctrl_win[3], A_REVERSE);
+                        mvwprintw(ctrl_win[3], 4, 15 + j, "#");
+                        wattroff(ctrl_win[3], A_REVERSE);
+                    }
+                    else
+                        mvwprintw(ctrl_win[3], 4, 15 + j, "#");
+                }
+            }
 
             wrefresh(ctrl_win[0]);
             wrefresh(ctrl_win[1]);
@@ -118,6 +143,9 @@ int main(void)
             choice = wgetch(ctrl_win[0]);
             nodelay(ctrl_win[0], TRUE);
             nodelay(ctrl_win[3], TRUE);
+
+            int selection1;
+            int selection2;
             switch (choice)
             {
             case KEY_UP:
@@ -137,18 +165,34 @@ int main(void)
                 quit = true;
                 break;
             case 's':
-                create_selection_window(asc_desc, "ascending or descending", 2);
+                selection1 = create_selection_window(asc_desc, "ascending or descending", 2);
+                library = sort(library, selection1);
                 break;
             case 'w':
                 library = save_library(library);
                 create_status_window("Saved library data to \"library.data\".");
+                break;
+            case 32:
+                if (waitpid(f, &status, WNOHANG | WUNTRACED))
+                    kill(f, SIGCONT);
+                else
+                    kill(f, SIGSTOP);
+                break;
+            case 62:
+                write(fd2[1], "62", 10);
+                if (queue->next != NULL)
+                {
+                    play_track = queue->next;
+                    queue = queue->next;
+                }
                 break;
             case KEY_RIGHT:
                 highlight_track = 0;
                 while (TRUE)
                 {
                     album_len = get_album_len(curr_album->album);
-                    mvprintw(1, 1, "%d", album_len);
+                    curr_track = get_nth_track(curr_album->album, highlight_track);
+
                     i = 0;
                     for (struct album *temp = curr_album->album; temp; temp = temp->next, ++i)
                     {
@@ -169,6 +213,7 @@ int main(void)
 
                     wrefresh(ctrl_win[1]);
                     wrefresh(ctrl_win[2]);
+                    wrefresh(ctrl_win[3]);
                     choice = wgetch(ctrl_win[1]);
 
                     if (choice == KEY_LEFT)
@@ -196,9 +241,24 @@ int main(void)
                             --highlight_track;
                         break;
                     case KEY_DOWN:
-                        if (!highlight_track >= album_len - 1 && album_len != 1)
+                        if (highlight_track < album_len - 1)
                             ++highlight_track;
                         break;
+                    case 's':
+                        selection1 = create_selection_window(sort_data, "track title, artist, or duration", 3);
+                        selection2 = create_selection_window(asc_desc, "ascending or descending", 2);
+                        werase(ctrl_win[1]);
+                        box(ctrl_win[1], 0, 0);
+                        i = 0;
+                        for (struct album *temp = curr_album->album; temp; temp = temp->next, ++i)
+                        {
+                            if (i == highlight_track)
+                                wattron(ctrl_win[1], A_REVERSE);
+                            mvwprintw(ctrl_win[1], i + 2, 2, temp->data->title);
+                            wattroff(ctrl_win[1], A_REVERSE);
+                        }
+                        curr_album = sort_album(curr_album, selection2, selection1);
+
                     case 32:
                         if (waitpid(f, &status, WNOHANG | WUNTRACED))
                             kill(f, SIGCONT);
@@ -208,11 +268,16 @@ int main(void)
                     case 62:
                         write(fd2[1], "62", 10);
                         if (queue->next != NULL)
+                        {
+                            play_track = queue->next;
                             queue = queue->next;
+                        }
                         break;
                     case 10:
                         write(fd1[1], curr_track->data->path, sizeof(curr_track->data->path));
                         add_to_album(queue, curr_track->data);
+                        play_track = curr_track;
+                        kill(f, SIGCONT);
                         break;
                     default:
                         break;
@@ -269,7 +334,7 @@ int main(void)
                 char status[10] = {'\0'};
                 read(fd2[0], status, sizeof(status));
                 clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
-                elapsed = end.tv_nsec - start.tv_sec;
+                elapsed = end.tv_sec - start.tv_sec;
                 char time2[10];
                 sprintf(time2, "%d", elapsed);
                 write(fd3[1], time2, 10);
@@ -294,8 +359,11 @@ char *convert_sec_to_minsec(int time)
     int minutes = time / 60;
     int seconds = time % 60;
 
-    char *formatted_time = calloc(6, sizeof(char));
-    snprintf(formatted_time, 6, "%d:%d", minutes, seconds);
+    char *formatted_time = calloc(10, sizeof(char));
+    if (seconds < 10)
+        snprintf(formatted_time, 10, "%d:0%d", minutes, seconds);
+    else
+        snprintf(formatted_time, 10, "%d:%d", minutes, seconds);
 
     return formatted_time;
 }
