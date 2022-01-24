@@ -227,7 +227,7 @@ int main(void)
     }
     else
     {
-        time_t start, end;
+        struct timespec start, end;
         int elapsed;
         fcntl(fd2[0], F_SETFL, O_NONBLOCK);
         fcntl(fd3[1], F_SETFL, O_NONBLOCK);
@@ -258,7 +258,7 @@ int main(void)
 
             int i = Mix_PlayMusic(music, 1);
             Mix_VolumeMusic(10);
-            time(&start);
+            clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
             int running = TRUE;
             char status[10] = {'\0'};
             while (read(fd2[0], status, sizeof(status)) != -1)
@@ -268,8 +268,8 @@ int main(void)
             {
                 char status[10] = {'\0'};
                 read(fd2[0], status, sizeof(status));
-                time(&end);
-                elapsed = difftime(end, start);
+                clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
+                elapsed = end.tv_nsec - start.tv_sec;
                 char time2[10];
                 sprintf(time2, "%d", elapsed);
                 write(fd3[1], time2, 10);
