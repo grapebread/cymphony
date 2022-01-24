@@ -3,7 +3,25 @@
 Shuprovo Sikder and Geoffrey Lin  
 Period 4
 
-## Proposal
+### Description
+Our project is a music library that interacts with mp3s in order to play music. 
+
+### List of Required Libraries
+- FFmpeg
+	`apt-get install libavformat-dev libavutil-dev libavcodec-dev`
+- SDL
+	`apt-get install libsdl2-dev libsdl2-mixer-dev`
+- ncurses
+    `apt-get install libncurses5-dev`
+
+### How to Use
+- Compile using `make`
+- Run using `./copium`. When opened it will read a libraries.data file or if you don't one it will run and prompt you for a mp3 file located in the folder. Enter a mp3 file name and it will add it to the library. If you want to add more mp3 files to the library, use the 'a' key.
+- Navigate through your albums using the up or down arrow keys. In order to play the music, go any of the albums and use the right arrow key which will bring you to the tracks column and hit enter. You can skip a track by using the '>' key.
+- If you want to quit use the 'q'  key and if you want to save your library data use the 'w' key.
+
+-------------------------------------
+# Proposal
 
 ### Description
 Our project is to create a music library that can interact with mp3 files in order to play music while using the library.
