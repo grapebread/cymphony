@@ -25,7 +25,8 @@ int main(void)
     int album_len;
 
     int quit = false;
-    char *asc_desc[2] = {"Ascending", "Descending"};
+    char *asc_desc[] = {"Ascending", "Descending"};
+    char *sort_data[] = {"Title", "Artist", "Genre", "Duration"};
     char input[100] = {'\0'};
 
     av_log_set_level(AV_LOG_QUIET);
@@ -55,7 +56,6 @@ int main(void)
         else
         {
             // reads library.data
-            printf("here\n");
             library = read_library();
         }
 
@@ -136,7 +136,7 @@ int main(void)
                 while (TRUE)
                 {
                     album_len = get_album_len(curr_album->album);
-                    printw("%d", album_len);
+                    mvprintw(1, 1, "%d", album_len);
                     i = 0;
                     for (struct album *temp = curr_album->album; temp; temp = temp->next, ++i)
                     {
@@ -177,34 +177,37 @@ int main(void)
                         quit = true;
                         break;
                     }
-
-                    switch (choice)
+                    else if (album_len != 0)
                     {
-                    case KEY_UP:
-                        if (!(highlight_track <= 0))
-                            --highlight_track;
-                        break;
-                    case KEY_DOWN:
-                        if (!highlight_track >= album_len - 1)
-                            ++highlight_track;
-                        break;
-                    case 32:
-                        if (waitpid(f, &status, WNOHANG | WUNTRACED))
-                            kill(f, SIGCONT);
-                        else
-                            kill(f, SIGSTOP);
-                        break;
-                    case 62:
-                        write(fd2[1], "62", 10);
-                        if (queue->next != NULL)
-                            queue = queue->next;
-                        break;
-                    case 10:
-                        write(fd1[1], curr_track->data->path, sizeof(curr_track->data->path));
-                        add_to_album(queue, curr_track->data);
-                        break;
-                    default:
-                        break;
+
+                        switch (choice)
+                        {
+                        case KEY_UP:
+                            if (!(highlight_track <= 0))
+                                --highlight_track;
+                            break;
+                        case KEY_DOWN:
+                            if (!highlight_track >= album_len - 1)
+                                ++highlight_track;
+                            break;
+                        case 32:
+                            if (waitpid(f, &status, WNOHANG | WUNTRACED))
+                                kill(f, SIGCONT);
+                            else
+                                kill(f, SIGSTOP);
+                            break;
+                        case 62:
+                            write(fd2[1], "62", 10);
+                            if (queue->next != NULL)
+                                queue = queue->next;
+                            break;
+                        case 10:
+                            write(fd1[1], curr_track->data->path, sizeof(curr_track->data->path));
+                            add_to_album(queue, curr_track->data);
+                            break;
+                        default:
+                            break;
+                        }
                     }
                 }
             default:

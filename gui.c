@@ -82,13 +82,13 @@ void create_status_window(char *message)
     del_panel(pan);
 }
 
-int create_selection_window(char **selections, int size)
+int create_selection_window(char **selections, char *message, int size)
 {
     int y_max, x_max;
     getmaxyx(stdscr, y_max, x_max);
     WINDOW *win = create_win(size + 8, 40, (y_max / 2) - 10, (x_max / 2) - 20);
     PANEL *pan = new_panel(win);
-    mvwprintw(pan->win, 2, 2, "Sort by ascending or descending?");
+    mvwprintw(pan->win, 2, 2, "Sort by %s?", message);
     wrefresh(win);
 
     int highlight = 0;
@@ -107,15 +107,17 @@ int create_selection_window(char **selections, int size)
 
         switch (c)
         {
-        case KEY_UP:
+        case 65:
             if (!(highlight <= 0))
                 --highlight;
             break;
-        case KEY_DOWN:
+        case 66:
             if (!(highlight >= size - 1))
                 ++highlight;
             break;
         case 10:
+            printw("%d", highlight);
+            refresh();
             return highlight;
             break;
         default:
