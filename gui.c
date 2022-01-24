@@ -5,7 +5,7 @@ WINDOW **setup(WINDOW **ctrl_win)
     initscr();
     nodelay(stdscr, true);
     noecho();
-    // curs_set(0);
+    curs_set(0);
 
     int y_max, x_max;
     getmaxyx(stdscr, y_max, x_max);
@@ -43,6 +43,26 @@ WINDOW *create_win(int height, int width, int start_y, int start_x)
     return win;
 }
 
+void create_input_window(char *message, char *input)
+{
+    int y_max, x_max;
+    getmaxyx(stdscr, y_max, x_max);
+    WINDOW *win = create_win(6, 80, (y_max / 2) - 4, (x_max / 2) - 40);
+    PANEL *pan = new_panel(win);
+
+    mvwprintw(win, 2, 2, message);
+    wmove(win, 3, 2);
+    wrefresh(win);
+    nodelay(stdscr, false);
+    curs_set(1);
+    echo();
+    wgetstr(win, input);
+    noecho();
+    curs_set(0);
+    nodelay(win, true);
+    del_panel(pan);
+}
+
 void create_status_window(char *message)
 {
     int y_max, x_max;
@@ -60,4 +80,46 @@ void create_status_window(char *message)
         }
     }
     del_panel(pan);
+}
+
+int create_selection_window(char **selections, int size)
+{
+    int y_max, x_max;
+    getmaxyx(stdscr, y_max, x_max);
+    WINDOW *win = create_win(size + 8, 40, (y_max / 2) - 10, (x_max / 2) - 20);
+    PANEL *pan = new_panel(win);
+    mvwprintw(pan->win, 2, 2, "Sort by ascending or descending?");
+    wrefresh(win);
+
+    int highlight = 0;
+
+    while (true)
+    {
+        for (int i = 0; i < 2; ++i)
+        {
+            if (i == highlight)
+                wattron(pan->win, A_REVERSE);
+            mvwprintw(pan->win, i + 4, 2, selections[i]);
+            wattroff(pan->win, A_REVERSE);
+        }
+
+        int c = wgetch(pan->win);
+
+        switch (c)
+        {
+        case KEY_UP:
+            if (!(highlight <= 0))
+                --highlight;
+            break;
+        case KEY_DOWN:
+            if (!(highlight >= size - 1))
+                ++highlight;
+            break;
+        case 10:
+            return highlight;
+            break;
+        default:
+            break;
+        }
+    }
 }

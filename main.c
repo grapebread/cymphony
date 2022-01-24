@@ -7,6 +7,8 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
 
+#include <libavutil/log.h>
+
 #include "library.h"
 #include "gui.h"
 
@@ -19,13 +21,27 @@ int main(void)
     pipe(fd1);
     pipe(fd2);
     int f = fork();
+    int quit = false;
+    int album_len;
+    char *asc_desc[2] = {"Ascending", "Descending"};
+    av_log_set_level(AV_LOG_QUIET);
 
     if (f)
     {
         fcntl(fd2[1], F_SETFL, O_NONBLOCK);
         close(fd1[0]);
 
-        struct library *library = read_library();
+        struct library *library = make_library();
+        library = add_to_library(library, "music/ab1.mp3");
+        // library = add_to_library(library, "music/ab2.mp3");
+        library = add_to_library(library, "music/cc1.mp3");
+        library = add_to_library(library, "music/cc2.mp3");
+        library = add_to_library(library, "music/dd1.mp3");
+        library = add_to_library(library, "music/dd2.mp3");
+        library = add_to_library(library, "music/kv1.mp3");
+        library = add_to_library(library, "music/kv2.mp3");
+        // save_library(library);
+        //  struct library *library = read_library();
 
         // 0 - Albums
         // 1 - Tracks
@@ -43,12 +59,24 @@ int main(void)
         int i;
         while (TRUE)
         {
+            if (quit)
+                break;
+
+            char input[100] = {'\0'};
+
+            werase(ctrl_win[0]);
+            box(ctrl_win[0], 0, 0);
+            werase(ctrl_win[1]);
+            box(ctrl_win[1], 0, 0);
+            werase(ctrl_win[2]);
+            box(ctrl_win[2], 0, 0);
+            werase(ctrl_win[3]);
+            box(ctrl_win[3], 0, 0);
+
             int status;
             int library_len = get_library_len(library);
 
             i = 0;
-            werase(ctrl_win[0]);
-            box(ctrl_win[0], 0, 0);
             for (struct library *temp = library; temp; temp = temp->next, ++i)
             {
                 if (i == highlight_album)
@@ -60,8 +88,6 @@ int main(void)
             struct library *curr_album = get_nth_album(library, highlight_album);
 
             i = 0;
-            werase(ctrl_win[1]);
-            box(ctrl_win[1], 0, 0);
             for (struct album *temp = curr_album->album; temp; temp = temp->next, ++i)
             {
                 mvwprintw(ctrl_win[1], i + 2, 2, temp->data->title);
@@ -69,10 +95,9 @@ int main(void)
 
             wrefresh(ctrl_win[0]);
             wrefresh(ctrl_win[1]);
+            wrefresh(ctrl_win[2]);
+            wrefresh(ctrl_win[3]);
             choice = wgetch(ctrl_win[0]);
-
-            if (choice == 'q')
-                break;
 
             switch (choice)
             {
@@ -85,15 +110,26 @@ int main(void)
                     ++highlight_album;
                 break;
             case 'a':
+                memset(input, '\0', sizeof(input));
+                create_input_window("Please enter a path to a song to add to the library below. (relative please)", input);
+                library = add_to_library(library, input);
+                break;
+            case 'q':
+                quit = true;
                 break;
             case 's':
+                create_selection_window(asc_desc, 2);
                 break;
             case 'w':
+                // save_library(library);
+                create_status_window("Saved library data to \"library.data\".");
                 break;
             case KEY_RIGHT:
                 highlight_track = 0;
                 while (TRUE)
                 {
+                    album_len = get_album_len(curr_album->album);
+                    printw("%d", album_len);
                     i = 0;
                     for (struct album *temp = curr_album->album; temp; temp = temp->next, ++i)
                     {
@@ -129,6 +165,12 @@ int main(void)
                         break;
                     }
 
+                    if (choice == 'q')
+                    {
+                        quit = true;
+                        break;
+                    }
+
                     switch (choice)
                     {
                     case KEY_UP:
@@ -136,7 +178,7 @@ int main(void)
                             --highlight_track;
                         break;
                     case KEY_DOWN:
-                        if (!highlight_track >= 1)
+                        if (!highlight_track >= album_len - 1)
                             ++highlight_track;
                         break;
                     case 32:
@@ -217,6 +259,8 @@ int main(void)
         Mix_CloseAudio();
         SDL_Quit();
     }
+
+    printf("%d\n", album_len);
 
     return 0;
 }

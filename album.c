@@ -2,32 +2,32 @@
 
 struct album *make_album()
 {
-  struct album *album = calloc(1, sizeof(struct album));
-  album->data = NULL;
-  album->next = NULL;
-  return album;
+    struct album *album = calloc(1, sizeof(struct album));
+    album->data = NULL;
+    album->next = NULL;
+    return album;
 }
 
 struct album *add_to_album(struct album *data, struct tags *new_mp3)
 {
-  struct album *head = data;
-  struct album *new_data = make_album();
-  strcpy(new_data->name, data->name);
-  new_data->data = new_mp3;
-  if (data->data == NULL)
-  {
-    data = new_data;
-    return data;
-  }
-  else
-  {
-    while (data->next != NULL)
+    struct album *head = data;
+    struct album *new_data = make_album();
+    strcpy(new_data->name, data->name);
+    new_data->data = new_mp3;
+    if (data->data == NULL)
     {
-      data = data->next;
+        data = new_data;
+        return data;
     }
-    data->next = new_data;
-    return head;
-  }
+    else
+    {
+        while (data->next != NULL)
+        {
+            data = data->next;
+        }
+        data->next = new_data;
+        return head;
+    }
 }
 
 /*void save_album(struct album *data, char *filename){
@@ -42,13 +42,26 @@ struct album *add_to_album(struct album *data, struct tags *new_mp3)
 
 struct album *get_nth_track(struct album *data, int n)
 {
-  int i = 0;
-  while (data)
-  {
-    if (i == n)
-      return data;
+    int i = 0;
+    while (data)
+    {
+        if (i == n)
+            return data;
 
-    ++i;
-    data = data->next;
-  }
+        ++i;
+        data = data->next;
+    }
+}
+
+int get_album_len(struct album *data)
+{
+    int i = 0;
+
+    while (data)
+    {
+        ++i;
+        data = data->next;
+    }
+
+    return i;
 }
