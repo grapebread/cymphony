@@ -27,9 +27,9 @@ WINDOW **setup(WINDOW **ctrl_win)
     WINDOW *track_title = create_win(title_pad, width, 0, width + 1);
     WINDOW *info_title = create_win(title_pad, width, 0, width * 2 + 1);
 
-    mvwprintw(album_title, 2, (x_max - strlen("Albums")) / 2, "Albums");
-    mvwprintw(track_title, 2, (x_max - strlen("Tracks")) / 2, "Tracks");
-    mvwprintw(info_title, 2, (x_max - strlen("Info & Queue")) / 2, "Info & Queue");
+    mvwprintw(album_title, 1, (width - strlen("Albums")) / 2, "Albums");
+    mvwprintw(track_title, 1, (width - strlen("Tracks")) / 2, "Tracks");
+    mvwprintw(info_title, 1, (width - strlen("Track Info")) / 2, "Track Info");
 
     refresh();
     wrefresh(album_title);

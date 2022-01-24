@@ -112,27 +112,51 @@ int main(void)
             char strtime[10] = {"/0"};
             if (read(fd3[0], strtime, 10) != -1 && play_track != NULL)
             {
-                int info_y, info_x;
-                getmaxyx(ctrl_win[3], info_y, info_x);
+                int bar_y, bar_x;
+                getmaxyx(ctrl_win[3], bar_y, bar_x);
 
                 char title[512];
-                sprintf(title, "%s by %s", play_track->data->title, play_track->data->artist);
-                mvwprintw(ctrl_win[3], 2, (info_x - strlen(title)) / 2, title);
-                mvwprintw(ctrl_win[3], 4, 2, "%s / %s", convert_sec_to_minsec(atoi(strtime)), convert_sec_to_minsec(play_track->data->duration));
-
-                float ratio = atoi(strtime) / (float)play_track->data->duration;
-
-                for (int j = 0; j < info_x - 23; j++)
+                if (queue->data == NULL)
                 {
-                    int threshold = ratio * (info_x - 25);
-                    if (j < threshold)
+                    sprintf(title, "%s by %s", play_track->data->title, play_track->data->artist);
+                    mvwprintw(ctrl_win[3], 2, (bar_x - strlen(title)) / 2, title);
+                    mvwprintw(ctrl_win[3], 4, 2, "%s / %s", convert_sec_to_minsec(atoi(strtime)), convert_sec_to_minsec(play_track->data->duration));
+
+                    float ratio = atoi(strtime) / (float)play_track->data->duration;
+
+                    for (int j = 0; j < bar_x - 23; j++)
                     {
-                        wattron(ctrl_win[3], A_REVERSE);
-                        mvwprintw(ctrl_win[3], 4, 15 + j, "#");
-                        wattroff(ctrl_win[3], A_REVERSE);
+                        int threshold = ratio * (bar_x - 25);
+                        if (j < threshold)
+                        {
+                            wattron(ctrl_win[3], A_REVERSE);
+                            mvwprintw(ctrl_win[3], 4, 15 + j, "#");
+                            wattroff(ctrl_win[3], A_REVERSE);
+                        }
+                        else
+                            mvwprintw(ctrl_win[3], 4, 15 + j, "#");
                     }
-                    else
-                        mvwprintw(ctrl_win[3], 4, 15 + j, "#");
+                }
+                else
+                {
+                    sprintf(title, "%s by %s", queue->data->title, queue->data->artist);
+                    mvwprintw(ctrl_win[3], 2, (bar_x - strlen(title)) / 2, title);
+                    mvwprintw(ctrl_win[3], 4, 2, "%s / %s", convert_sec_to_minsec(atoi(strtime)), convert_sec_to_minsec(queue->data->duration));
+
+                    float ratio = atoi(strtime) / (float)queue->data->duration;
+
+                    for (int j = 0; j < bar_x - 23; j++)
+                    {
+                        int threshold = ratio * (bar_x - 25);
+                        if (j < threshold)
+                        {
+                            wattron(ctrl_win[3], A_REVERSE);
+                            mvwprintw(ctrl_win[3], 4, 15 + j, "#");
+                            wattroff(ctrl_win[3], A_REVERSE);
+                        }
+                        else
+                            mvwprintw(ctrl_win[3], 4, 15 + j, "#");
+                    }
                 }
             }
 
