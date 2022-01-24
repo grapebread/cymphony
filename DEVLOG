@@ -1,0 +1,32 @@
+January 13
+Shuprovo Sikder: Added necessary libraries for SDL and got sound demo working
+
+January 14 
+7:29 PM
+Geoffrey Lin: Added an id3v1 reader for reading mp3 metadata
+
+January 19
+Shuprovo Sikder: Removed DLLs and modified makefile
+
+January 20
+Shuprovo Sikder: Added GUI framework
+
+January 21 
+10:39 AM
+Geoffrey Lin: Updated metadata reader to read id3v2
+10:50 AM
+Geoffrey Lin: Added read/saving files
+
+January 23 
+2:59 PM
+Geoffrey Lin: Added some signals and updated GUI a little
+3:05 PM
+Geoffrey Lin: Readded saving/opening
+
+Shuprovo Sikder: GUI updated
+
+Shuprovo Sikder: Made GUI code a bit cleaner and integrated sound with Geoffrey's help
+
+Shuprovo Shikder: Added beginning check and song functionality
+
+
