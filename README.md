@@ -19,6 +19,7 @@ Our project is a music library that interacts with mp3s in order to play music.
 - Run using `./copium`. When opened it will read a libraries.data file or if you don't one it will run and prompt you for a mp3 file located in the folder. Enter a mp3 file name and it will add it to the library. If you want to add more mp3 files to the library, use the 'a' key.
 - Navigate through your albums using the up or down arrow keys. In order to play the music, go any of the albums and use the right arrow key which will bring you to the tracks column and hit enter. You can skip a track by using the '>' key.
 - If you want to quit use the 'q'  key and if you want to save your library data use the 'w' key.
+- You can sort albums and the track list by pressing the `s` key while in their respective windows and following the prompts
 
 ## Known Bugs
 - METADATA can be blank in mp3s leading to FFMPEG errors
