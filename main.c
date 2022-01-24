@@ -104,9 +104,13 @@ int main(void)
                 mvwprintw(ctrl_win[1], i + 2, 2, temp->data->title);
             }
             char strtime[10] = {"/0"};
-            if(read(fd3[0], strtime, 10) != -1){
-              mvwprintw(ctrl_win[3], i + 2, 2, strtime);
+            if (read(fd3[0], strtime, 10) != -1)
+            {
+                mvwprintw(ctrl_win[3], i + 2, 2, strtime);
             }
+
+            struct album *curr_track = get_nth_track(curr_album->album, highlight_track);
+
             wrefresh(ctrl_win[0]);
             wrefresh(ctrl_win[1]);
             wrefresh(ctrl_win[2]);
@@ -133,10 +137,10 @@ int main(void)
                 quit = true;
                 break;
             case 's':
-                create_selection_window(asc_desc, 2);
+                create_selection_window(asc_desc, "ascending or descending", 2);
                 break;
             case 'w':
-                // save_library(library);
+                library = save_library(library);
                 create_status_window("Saved library data to \"library.data\".");
                 break;
             case KEY_RIGHT:
@@ -156,7 +160,6 @@ int main(void)
 
                     werase(ctrl_win[2]);
                     box(ctrl_win[2], 0, 0);
-                    struct album *curr_track = get_nth_track(curr_album->album, highlight_track);
                     mvwprintw(ctrl_win[2], 2, 2, "Title: %s", curr_track->data->title);
                     mvwprintw(ctrl_win[2], 3, 2, "Artist: %s", curr_track->data->artist);
                     mvwprintw(ctrl_win[2], 4, 2, "Album: %s", curr_track->data->album);
@@ -185,37 +188,34 @@ int main(void)
                         quit = true;
                         break;
                     }
-                    else if (album_len != 0)
-                    {
 
-                        switch (choice)
-                        {
-                        case KEY_UP:
-                            if (!(highlight_track <= 0))
-                                --highlight_track;
-                            break;
-                        case KEY_DOWN:
-                            if (!highlight_track >= album_len - 1)
-                                ++highlight_track;
-                            break;
-                        case 32:
-                            if (waitpid(f, &status, WNOHANG | WUNTRACED))
-                                kill(f, SIGCONT);
-                            else
-                                kill(f, SIGSTOP);
-                            break;
-                        case 62:
-                            write(fd2[1], "62", 10);
-                            if (queue->next != NULL)
-                                queue = queue->next;
-                            break;
-                        case 10:
-                            write(fd1[1], curr_track->data->path, sizeof(curr_track->data->path));
-                            add_to_album(queue, curr_track->data);
-                            break;
-                        default:
-                            break;
-                        }
+                    switch (choice)
+                    {
+                    case KEY_UP:
+                        if (!(highlight_track <= 0))
+                            --highlight_track;
+                        break;
+                    case KEY_DOWN:
+                        if (!highlight_track >= album_len - 1 && album_len != 1)
+                            ++highlight_track;
+                        break;
+                    case 32:
+                        if (waitpid(f, &status, WNOHANG | WUNTRACED))
+                            kill(f, SIGCONT);
+                        else
+                            kill(f, SIGSTOP);
+                        break;
+                    case 62:
+                        write(fd2[1], "62", 10);
+                        if (queue->next != NULL)
+                            queue = queue->next;
+                        break;
+                    case 10:
+                        write(fd1[1], curr_track->data->path, sizeof(curr_track->data->path));
+                        add_to_album(queue, curr_track->data);
+                        break;
+                    default:
+                        break;
                     }
                 }
             default:

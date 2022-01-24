@@ -71,18 +71,21 @@ struct library *remove_from_library(struct library *data, char *name)
     return head;
 }
 
-void save_library(struct library *data)
+struct library *save_library(struct library *data)
 {
+    struct library *copy = make_library();
     int i = open("library.data", O_CREAT | O_TRUNC | O_WRONLY, 0644);
     while (data)
     {
         while (data->album)
         {
+            copy = add_to_library(copy, data->album->data->path);
             write(i, data->album->data->path, sizeof(data->album->data->path));
             data->album = data->album->next;
         }
         data = data->next;
     }
+    return copy;
 }
 
 struct library *read_library()
@@ -122,4 +125,10 @@ struct library *get_nth_album(struct library *data, int n)
         ++i;
         data = data->next;
     }
+}
+
+// direction = 0 = ascending
+// direction = 0 = descending
+struct library *sort(struct library *data, int direction)
+{
 }
