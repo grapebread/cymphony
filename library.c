@@ -85,6 +85,7 @@ struct library *save_library(struct library *data)
         }
         data = data->next;
     }
+    close(i);
     return copy;
 }
 
@@ -97,6 +98,7 @@ struct library *read_library()
     {
         new_library = add_to_library(new_library, path);
     }
+    close(i);
     return new_library;
 }
 

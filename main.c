@@ -298,8 +298,8 @@ int main(void)
                         }
                         break;
                     case 10:
+                    add_to_album(queue, curr_track->data);
                         write(fd1[1], curr_track->data->path, sizeof(curr_track->data->path));
-                        add_to_album(queue, curr_track->data);
                         play_track = curr_track;
                         kill(f, SIGCONT);
                         break;
