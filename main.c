@@ -3,6 +3,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <signal.h>
+#include <time.h>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
@@ -18,9 +19,11 @@ int main(void)
 {
     int fd1[2];
     int fd2[2];
+    int fd3[2];
 
     pipe(fd1);
     pipe(fd2);
+    pipe(fd3);
 
     int album_len;
 
@@ -36,6 +39,7 @@ int main(void)
     if (f)
     {
         fcntl(fd2[1], F_SETFL, O_NONBLOCK);
+        fcntl(fd3[0], F_SETFL, O_NONBLOCK);
         close(fd1[0]);
 
         struct library *library = make_library();
@@ -99,13 +103,17 @@ int main(void)
             {
                 mvwprintw(ctrl_win[1], i + 2, 2, temp->data->title);
             }
-
+            char strtime[10] = {"/0"};
+            if(read(fd3[0], strtime, 10) != -1){
+              mvwprintw(ctrl_win[3], i + 2, 2, strtime);
+            }
             wrefresh(ctrl_win[0]);
             wrefresh(ctrl_win[1]);
             wrefresh(ctrl_win[2]);
             wrefresh(ctrl_win[3]);
             choice = wgetch(ctrl_win[0]);
-
+            nodelay(ctrl_win[0], TRUE);
+            nodelay(ctrl_win[3], TRUE);
             switch (choice)
             {
             case KEY_UP:
@@ -219,7 +227,10 @@ int main(void)
     }
     else
     {
+        time_t start, end;
+        int elapsed;
         fcntl(fd2[0], F_SETFL, O_NONBLOCK);
+        fcntl(fd3[1], F_SETFL, O_NONBLOCK);
         if (SDL_Init(SDL_INIT_AUDIO) < 0)
         {
             printf("SDL could not initialise. Error:%s\n", SDL_GetError());
@@ -247,18 +258,21 @@ int main(void)
 
             int i = Mix_PlayMusic(music, 1);
             Mix_VolumeMusic(10);
-
+            time(&start);
             int running = TRUE;
             char status[10] = {'\0'};
             while (read(fd2[0], status, sizeof(status)) != -1)
             {
             }
-
             while (running)
             {
                 char status[10] = {'\0'};
                 read(fd2[0], status, sizeof(status));
-
+                time(&end);
+                elapsed = difftime(end, start);
+                char time2[10];
+                sprintf(time2, "%d", elapsed);
+                write(fd3[1], time2, 10);
                 if (!Mix_PlayingMusic())
                     break;
                 if (!strcmp(status, "62"))
