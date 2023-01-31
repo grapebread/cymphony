@@ -1,10 +1,9 @@
-# Copium
+# Cymphony
 
 Shuprovo Sikder and Geoffrey Lin  
-Period 4
 
 ### Description
-Our project is a music library that interacts with mp3s in order to play music. 
+A music library that interacts with mp3s in order to play music. 
 
 ### List of Required Libraries
 - FFmpeg
@@ -32,7 +31,7 @@ Our project is a music library that interacts with mp3s in order to play music.
 # Proposal
 
 ### Description
-Our project is to create a music library that can interact with mp3 files in order to play music while using the library.
+A music library that can interact with mp3 files in order to play music while using the library.
 
 ### User Interface
 There will be a GUI with an album list to the left. Once the user clicks on an album, the tracks of the album will be shown in the middle of the program. There will be multiple functions depending on how the user interacts with the track (add to queue, clear queue and play, display track info, etc.) To the right, track info will be displayed like album, artist, duration, and any other metadata we find. If we have time, if the track has an image embedded, we could also display that. At the bottom, there will be a progress bar with the current playing track title and various buttons that do different functions like saving the music library, etc. Rough sketch below:
